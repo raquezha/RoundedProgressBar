@@ -1,6 +1,7 @@
 package com.mackhartley.roundedprogressbar
 
 import android.content.Context
+import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Rect
@@ -10,6 +11,7 @@ import android.view.View
 import androidx.annotation.ColorInt
 import androidx.core.content.ContextCompat
 import kotlin.math.max
+
 
 internal class ProgressTextOverlay @JvmOverloads constructor(
     context: Context,
@@ -22,6 +24,9 @@ internal class ProgressTextOverlay @JvmOverloads constructor(
         const val DEFAULT_SHOW_TEXT = true
         const val DEFAULT_FONT_PATH = ""
     }
+
+    private var scooter = BitmapFactory.decodeResource(resources, R.drawable.scooter_icon_24dp)
+
 
     // Default values (Progress text related)
     private val defaultTextSize = context.resources.getDimension(R.dimen.rpb_default_text_size)
@@ -58,15 +63,20 @@ internal class ProgressTextOverlay @JvmOverloads constructor(
 
         // init font
         if (customFontPath.isNotBlank()) setCustomFontPath(customFontPath)
+        val opt = BitmapFactory.Options()
+        opt.inMutable = true
+        scooter = BitmapFactory.decodeResource(resources, R.drawable.scooter_icon_24dp, opt)
 
         reCalculateTextHeight() // Sets the initial text size (MUST BE LAST STEP IN INIT)
     }
+
 
     override fun onDraw(canvas: Canvas?) {
         if (showProgressText) {
             super.onDraw(canvas)
 
-            val yPosition = (height) / 2 + (textContainerHeight / 2)
+            val yPosition = (height - scooter.height) / 2f
+            //val yPosition = (height) / 3 - (textContainerHeight / 3)
 
             val progressDrawableWidth = width * progressValue
             val requiredTextContainerWidth = textContainerWidth + (2 * textSidePadding)
@@ -74,11 +84,13 @@ internal class ProgressTextOverlay @JvmOverloads constructor(
             if (requiredTextContainerWidth < progressDrawableWidth) { // should use inside position
                 // Inside position = (Position to draw) - (Width of text) - (Padding of text)
                 xPosition = (width * progressValue) - textContainerWidth - textSidePadding
-                canvas?.drawText(progressTextFormatter.getProgressText(progressValue), xPosition, yPosition, progressTextOverlayPaint)
+                // canvas?.drawText(progressTextFormatter.getProgressText(progressValue), xPosition, yPosition, progressTextOverlayPaint)
+                canvas?.drawBitmap(scooter,xPosition, yPosition, progressTextOverlayPaint)
             } else { // should use outside position
                 // Outside position = (Position to draw) + (Padding of text)
-                xPosition = (width * progressValue) + textSidePadding
-                canvas?.drawText(progressTextFormatter.getProgressText(progressValue), xPosition, yPosition, backgroundTextOverlayPaint)
+                xPosition = 0 + textSidePadding
+                // canvas?.drawText(progressTextFormatter.getProgressText(progressValue), xPosition, yPosition, backgroundTextOverlayPaint)
+                canvas?.drawBitmap(scooter, xPosition, yPosition, progressTextOverlayPaint)
             }
         }
     }
